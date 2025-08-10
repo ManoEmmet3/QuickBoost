@@ -2,10 +2,10 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
 import tkinter as tk
-from telas import scan_pc  # importa a função da outra tela
+import threading
+from telas import scan_pc
 
 def mostrar(frame_pai):
-    # Limpa widgets anteriores
     for widget in frame_pai.winfo_children():
         widget.destroy()
 
@@ -59,7 +59,23 @@ def mostrar(frame_pai):
 
     fonte_botao = ("Inter", 15)
 
-    # Botão para ir para a tela Scan PC
+    def iniciar_scan():
+        # Mostra texto ou animação de carregando
+        loading_label = ctk.CTkLabel(frame_pai, text="Carregando...", text_color="white", font=("Inter", 14))
+        loading_label.place(relx=0.5, rely=0.7, anchor="center")
+
+        def tarefa_scan():
+            # Simula demora (ou faz o processamento pesado aqui)
+            import time
+            time.sleep(2)  # simula scan demorado
+
+            # Após terminar, remove loading e chama scan_pc
+            loading_label.destroy()
+            scan_pc.mostrar(frame_pai)
+
+        # Roda a tarefa na thread para não travar interface
+        threading.Thread(target=tarefa_scan, daemon=True).start()
+
     botao1 = ctk.CTkButton(
         frame_pai,
         text="Scan PC",
@@ -70,11 +86,10 @@ def mostrar(frame_pai):
         text_color="white",
         font=fonte_botao,
         hover_color="#9375FF",
-        command=lambda: scan_pc.mostrar(frame_pai)  # chama função da outra tela
+        command=iniciar_scan  # chama função que mostra loading e depois scan_pc
     )
     botao1.place(x=x_inicial, y=y_inicial)
 
-    # Botão Ler mais
     botao2 = ctk.CTkButton(
         frame_pai,
         text="Ler mais",
